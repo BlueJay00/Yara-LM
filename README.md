@@ -19,7 +19,7 @@ This Python script automates the detection of potential threats found on any typ
 
 ```bash
 
-git clone https://github.com/BlueJay00/Yara-LM.git <br />
+git clone https://github.com/BlueJay00/Yara-LM.git
 cd Yara-LM
 
 ```
