@@ -44,24 +44,28 @@ The script will apply a defined pool of YARA rules to a defined number of log fi
 
 ## Sample Output
 
-[ <br />
-  { <br />
-    "title": "Alert001", <br />
-    "rule": "example_rule.yar", <br />
-    "log_file": "path/to/logs/example.log", <br />
-    "line_numbers": [42, 43, 44], <br />
-    "context": [ <br />
-      "Previous line 1", <br />
-      "Previous line 2", <br />
-      "Previous line 3", <br />
-      "Matched line", <br />
-      "Next line 1", <br />
-      "Next line 2", <br />
-      "Next line 3" <br />
-    ] <br />
-  }, <br />
-  // ... (additional alerts) <br />
-] <br />
+```json
+
+[
+  {
+    "title": "Alert001",
+    "rule": "example_rule.yar",
+    "log_file": "path/to/logs/example.log",
+    "line_numbers": [42, 43, 44],
+    "context": [
+      "Previous line 1",
+      "Previous line 2",
+      "Previous line 3",
+      "Matched line",
+      "Next line 1",
+      "Next line 2",
+      "Next line 3"
+    ]
+  },
+  // ... (additional alerts)
+]
+
+```
 
 ## Notes
 
