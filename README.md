@@ -17,7 +17,7 @@ This Python script automates the detection of potential threats found on any typ
 
 1. Clone or download the repository.
 
-git clone https://github.com/BlueJay00/Yara-LM.git
+git clone https://github.com/BlueJay00/Yara-LM.git <br />
 cd Yara-LM
 
 2. Install the required components via PIP 
@@ -26,14 +26,14 @@ pip install -r requirements.txt
 
 3. Adjust the script parameters
 
-LOG_FOLDER_PATH = "path/to/logs"
+LOG_FOLDER_PATH = "path/to/logs" <br />
 YARA_RULES_FOLDER_PATH = "path/to/yara_rules"
 
 4. Optional adjustments
 
 You can also change other paramerters, like the context lines (3 above and 3 below), or the maximum number alerts to display. But I do not recommend this for better performance and output analysis.
 
-CONTEXT_LINES = 3
+CONTEXT_LINES = 3 <br />
 MAX_ALERTS_TO_DISPLAY = 100
 
 ## Usage
@@ -44,24 +44,24 @@ The script will apply a defined pool of YARA rules to a defined number of log fi
 
 ## Sample Output
 
-[
-  {
-    "title": "Alert001",
-    "rule": "example_rule.yar",
-    "log_file": "path/to/logs/example.log",
-    "line_numbers": [42, 43, 44],
-    "context": [
-      "Previous line 1",
-      "Previous line 2",
-      "Previous line 3",
-      "Matched line",
-      "Next line 1",
-      "Next line 2",
-      "Next line 3"
-    ]
-  },
-  // ... (additional alerts)
-]
+[ <br />
+  { <br />
+    "title": "Alert001", <br />
+    "rule": "example_rule.yar", <br />
+    "log_file": "path/to/logs/example.log", <br />
+    "line_numbers": [42, 43, 44], <br />
+    "context": [ <br />
+      "Previous line 1", <br />
+      "Previous line 2", <br />
+      "Previous line 3", <br />
+      "Matched line", <br />
+      "Next line 1", <br />
+      "Next line 2", <br />
+      "Next line 3" <br />
+    ] <br />
+  }, <br />
+  // ... (additional alerts) <br />
+] <br />
 
 ## Notes
 
