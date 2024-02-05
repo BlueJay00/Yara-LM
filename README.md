@@ -17,12 +17,20 @@ This Python script automates the detection of potential threats found on any typ
 
 1. Clone or download the repository.
 
+```bash
+
 git clone https://github.com/BlueJay00/Yara-LM.git <br />
 cd Yara-LM
 
+```
+
 2. Install the required components via PIP 
 
+```bash
+
 pip install -r requirements.txt
+
+```
 
 3. Adjust the script parameters
 
