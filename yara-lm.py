@@ -13,8 +13,22 @@ History:
   2024/02/05: continue v0.0.02
   2024/02/05: continue v0.0.03
   2024/02/05: first publication v0.0.04
+  2024/02/06: added ReadMe and requirements.txt
   
 Todo:
+- Logging: Implement a logging mechanism to record script activities and errors, providing a log file for troubleshooting.
+- Customizable Output Formats: Allow options to choose the output format (e.g., JSON, CSV, plain text) based on preference.
+- YARA Rule Versioning: Support different versions of YARA rules and allow to specify which version to use.
+- Parallel Processing: Enhance performance by implementing parallel processing, especially when dealing with a large number of logs or complex YARA rules.
+- Configurability: Extend the configuration options to include parameters such as the maximum context lines, maximum match count, or other.
+- Rule Exclusion: Allow users to specify YARA rules to be excluded during the analysis.
+- Interactive Mode: Implement an interactive mode where users can choose specific logs or YARA rules to analyze.
+- Rule Metadata: Display additional metadata information from YARA rules, such as rule descriptions, authors, or modification dates.
+- Rule Repository Integration: Connect to an online repository of YARA rules and allow users to download and update rules directly from the repository. Unsure yet!!!
+- Integration with SIEM Tools: Enable integration with SIEM tools for centralized log management and analysis. Unsure yet!!!
+- Alert Severity Levels: Assign severity levels to alerts based on the importance or potential impact of the detected alerts. Unsure yet!!!
+- Regular Expression Support: Extend the script to support regular expressions within YARA rules for more advanced pattern matching. Unsure yet!!!
+- Rule Whitelisting/Blacklisting: Allow to define rules or specific patterns to be whitelisted or blacklisted.
 
 """
 
