@@ -2,7 +2,7 @@
 
 __description__ = 'Matching YARA rules within log files'
 __author__ = 'BlueJay00'
-__version__ = '0.0.1'
+__version__ = '0.0.11'
 __date__ = '2023/02/07'
 
 
@@ -13,10 +13,11 @@ History:
   2024/02/05: continue v0.0.03
   2024/02/05: first publication v0.0.04
   2024/02/06: added ReadMe and requirements.txt
-  2024/02/07: csv output format added v.0.0.1 
+  2024/02/07: csv output format added v.0.0.1
+  2024/02/07: plain text out format added v.0.0.11
   
 Todo:
-- Add more customizable Output Formats: Include other outputs (like plain text, xml, html) based on preference.
+- Add more customizable Output Formats: Include other outputs (like xml, html) based on preference.
 - Logging: Implement a logging mechanism to record script activities and errors, providing a log file for troubleshooting.
 - YARA Rule Versioning: Support different versions of YARA rules and allow to specify which version to use.
 - Parallel Processing: Enhance performance by implementing parallel processing, especially when dealing with a large number of logs or complex YARA rules.
@@ -157,18 +158,32 @@ def truncate_alerts(alerts, max_alerts):
 
 def write_json_output(alerts):
     json_output = json.dumps(alerts, indent=2)
-    with open("output.json", "w") as json_file:
+    with open("alerts.json", "w") as json_file:
         json_file.write(json_output)
 
 # Write output in CSV format using csv python library
 
 def write_csv_output(alerts):
-    with open("output.csv", "w", newline='') as csv_file:
+    with open("alerts.csv", "w", newline='') as csv_file:
         fieldnames = ["title", "rule", "log_file", "line_numbers", "context"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         for alert in alerts:
             writer.writerow(alert)
+
+# Write output in Plain Text format 
+
+def write_plain_text_output(alerts):
+    with open("alerts.txt", "w") as txt_file:
+        for alert in alerts:
+            txt_file.write(f"{alert['title']}:\n")
+            txt_file.write(f"Rule: {alert['rule']}\n")
+            txt_file.write(f"Log File: {alert['log_file']}\n")
+            txt_file.write(f"Line Numbers: {', '.join(map(str, alert['line_numbers']))}\n")
+            txt_file.write(f"Context:\n")
+            for line in alert['context']:
+                txt_file.write(f"  {line.strip()}\n")
+            txt_file.write("\n")
 
 # Main function definition and point of execution, with the output format arguments.
 
@@ -194,12 +209,14 @@ def main(output_format):
             write_json_output(truncated_alerts)
         elif output_format == "csv":
             write_csv_output(truncated_alerts)
+        elif output_format == "plain":
+            write_plain_text_output(truncated_alerts)
         else:
-            print("Invalid output format. Please choose 'json' or 'csv'.")
+            print("Invalid output format. Please choose 'json', 'csv' or 'plain'.")
 
  
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YARA rule-based log matching script")
-    parser.add_argument("-o", "--output-format", choices=["json", "csv"], default="json", help="Output format (json, csv)")
+    parser.add_argument("-o", "--output-format", choices=["json", "csv", "plain"], default="json", help="Output format (json, csv, plain)")
     args = parser.parse_args()
     main(args.output_format)
