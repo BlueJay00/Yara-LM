@@ -2,10 +2,9 @@
 
 __description__ = 'Matching YARA rules within log files'
 __author__ = 'BlueJay00'
-__version__ = '0.0.04'
-__date__ = '2023/02/05'
+__version__ = '0.0.1'
+__date__ = '2023/02/07'
 
-# Author: BlueJay00
 
 """
 History:
@@ -14,10 +13,11 @@ History:
   2024/02/05: continue v0.0.03
   2024/02/05: first publication v0.0.04
   2024/02/06: added ReadMe and requirements.txt
+  2024/02/07: csv output format added v.0.0.1 
   
 Todo:
+- Add more customizable Output Formats: Include other outputs (like plain text, xml, html) based on preference.
 - Logging: Implement a logging mechanism to record script activities and errors, providing a log file for troubleshooting.
-- Customizable Output Formats: Allow options to choose the output format (e.g., JSON, CSV, plain text) based on preference.
 - YARA Rule Versioning: Support different versions of YARA rules and allow to specify which version to use.
 - Parallel Processing: Enhance performance by implementing parallel processing, especially when dealing with a large number of logs or complex YARA rules.
 - Configurability: Extend the configuration options to include parameters such as the maximum context lines, maximum match count, or other.
@@ -35,6 +35,10 @@ Todo:
 import os
 import yara
 import json
+import csv
+import argparse
+
+# CONFIGURATION
 
 # Path to the folder containing your logs (eg:web server access logs, web application logs, etc),
 # and especially those yara rules matching on certain exploitation characteristics,
@@ -65,6 +69,12 @@ max_match_count = 3
 max_alerts_to_display = 100
 
 
+# END CONFIGURATION
+
+
+# Section to read log files from the specified folder path containing the logs to review
+# For now, only log files ending in .log are included, more extensions to be added later
+
 def read_logs_from_folder(folder_path):
     log_data = {}
     for filename in os.listdir(folder_path):
@@ -74,8 +84,14 @@ def read_logs_from_folder(folder_path):
                 with open(file_path, "r", encoding="utf-8") as log_file:
                     log_data[file_path] = log_file.readlines()
             except FileNotFoundError:
-                print(f"File not found: {file_path}")
+                print(f"File ending with .log not found in: {file_path}")
     return log_data
+
+# Section to read and match from the given yara rules from the specified folder path
+# using the yara python to handle yara rule format and have access to the full potential
+# of YARA in python scripts.
+# Imported YARA rules get first compiled and then enumerated to attempt then to match
+# them with the previously loaded and read log files lines.
 
 def apply_yara_rules(log_data, rule_files):
     matches = []
@@ -101,10 +117,15 @@ def apply_yara_rules(log_data, rule_files):
 
     return matches
 
+# Provides the context (3 lines above, 3 lines below) for every line of log preciously matched.
+
 def get_match_context(lines, match_line_index, context_lines):
     start_index = max(0, match_line_index - context_lines)
     end_index = min(len(lines), match_line_index + context_lines + 1)
     return lines[start_index:end_index]
+
+# Aggregates matches if more than 3 matches for the same yara rule are found for the same log file.
+# Then, begins preparation of output by adding an numbered Alert title and what to do in aggregation of alerts.
 
 def aggregate_matches(matches):
     aggregated_alerts = {}
@@ -124,13 +145,34 @@ def aggregate_matches(matches):
 
     return list(aggregated_alerts.values())
 
+# Alerts get truncated at a maximum value of 100, returning a message if the value if reached.
+
 def truncate_alerts(alerts, max_alerts):
     if len(alerts) > max_alerts:
         print(f"Truncating output at {max_alerts} alerts. Try again with fewer log files or fewer YARA rules to match with.")
         return alerts[:max_alerts]
     return alerts
 
-def main():
+# Write output in JSON format using json python library
+
+def write_json_output(alerts):
+    json_output = json.dumps(alerts, indent=2)
+    with open("output.json", "w") as json_file:
+        json_file.write(json_output)
+
+# Write output in CSV format using csv python library
+
+def write_csv_output(alerts):
+    with open("output.csv", "w", newline='') as csv_file:
+        fieldnames = ["title", "rule", "log_file", "line_numbers", "context"]
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for alert in alerts:
+            writer.writerow(alert)
+
+# Main function definition and point of execution, with the output format arguments.
+
+def main(output_format):
     # Read logs from the folder containing log files
     logs = read_logs_from_folder(log_folder_path)
 
@@ -147,10 +189,17 @@ def main():
         # Truncate output if there are more than max_alerts_to_display
         truncated_alerts = truncate_alerts(aggregated_alerts, max_alerts_to_display)
 
-        # Output results in JSON format with Alert titles numbered
-        json_output = json.dumps(truncated_alerts, indent=2)
-        print(json_output)
+        # Output results in the specified format (json as default) with Alerts titles numbered
+        if output_format == "json":
+            write_json_output(truncated_alerts)
+        elif output_format == "csv":
+            write_csv_output(truncated_alerts)
+        else:
+            print("Invalid output format. Please choose 'json' or 'csv'.")
 
  
 if __name__ == "__main__":
-    Main()
+    parser = argparse.ArgumentParser(description="YARA rule-based log matching script")
+    parser.add_argument("-o", "--output-format", choices=["json", "csv"], default="json", help="Output format (json, csv)")
+    args = parser.parse_args()
+    main(args.output_format)
