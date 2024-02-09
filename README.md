@@ -48,7 +48,7 @@ MAX_ALERTS_TO_DISPLAY = 100
 
 python yara-lm.py
 
-The script will apply a defined pool of YARA rules to a defined number of log files and output aggregated alerts of macthes in JSON format.
+The script will apply a defined pool of YARA rules to a defined number of log files and output aggregated alerts of macthes in JSON format by default.
 
 ## Sample Output
 
@@ -57,21 +57,19 @@ The script will apply a defined pool of YARA rules to a defined number of log fi
 [
   {
     "title": "Alert001",
-    "rule": "example_rule.yar",
-    "log_file": "path/to/logs/example.log",
-    "line_numbers": [42, 43, 44],
-    "context": [
-      "Previous line 1",
-      "Previous line 2",
-      "Previous line 3",
-      "Matched line",
-      "Next line 1",
-      "Next line 2",
-      "Next line 3"
-    ]
+    "rule": "rule1",
+    "log_file": "example.log",
+    "line_numbers": [27, 34, 112],
+    "matched_lines": [
+      "Line 27: Matched Line",
+      "Line 34: Matched Line",
+      "Line 112: Matched Line"
+    ],
+    "aggregated": true
   },
   // ... (additional alerts)
 ]
+
 
 ```
 
@@ -81,3 +79,9 @@ The script will apply a defined pool of YARA rules to a defined number of log fi
 - The script supports a maximum of 100 alerts. If more alerts are present, output is truncated. This number is customizable, but it is not recommended to increase it further.
 - Adjust the content as needed, providing accurate paths and relevant details for your specific implementation.
  
+## Release Notes
+
+v.0.0.04	2024/02/05	First publication
+v.0.0.1		2024/02/07	Added csv output format
+v.0.0.11	2024/02/07	Added plain text format
+v.0.0.2		2024/02/09	Changed context into an option instead of a default output

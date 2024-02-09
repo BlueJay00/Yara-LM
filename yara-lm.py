@@ -2,8 +2,8 @@
 
 __description__ = 'Matching YARA rules within log files'
 __author__ = 'BlueJay00'
-__version__ = '0.0.11'
-__date__ = '2023/02/07'
+__version__ = '0.0.2'
+__date__ = '2023/02/09'
 
 
 """
@@ -15,6 +15,7 @@ History:
   2024/02/06: added ReadMe and requirements.txt
   2024/02/07: csv output format added v.0.0.1
   2024/02/07: plain text out format added v.0.0.11
+  2024/02/09: changed context into an option v.0.0.2
   
 Todo:
 - Add more customizable Output Formats: Include other outputs (like xml, html) based on preference.
@@ -109,16 +110,17 @@ def apply_yara_rules(log_data, rule_files):
                             "rule": os.path.basename(rule_file),
                             "log_file": log_file,
                             "line_numbers": [i + 1],
-                            "context": match_context
+                            "matched_lines": [line.strip()]
                         }
                     else:
                         match_contexts[match_hash]["line_numbers"].append(i + 1)
+                        match_contexts[match_hash]["matched_lines"].append(line.strip())
 
             matches.extend(match_contexts.values())
 
     return matches
 
-# Provides the context (3 lines above, 3 lines below) for every line of log preciously matched.
+# Provides the context (3 lines above, 3 lines below) for every line of log previously matched.
 
 def get_match_context(lines, match_line_index, context_lines):
     start_index = max(0, match_line_index - context_lines)
@@ -139,10 +141,13 @@ def aggregate_matches(matches):
                 "rule": match["rule"],
                 "log_file": match["log_file"],
                 "line_numbers": match["line_numbers"],
-                "context": match["context"]
+                "matched_lines": match["matched_lines"],
+                "aggregated": False
             }
         else:
             aggregated_alerts[alert_key]["line_numbers"].extend(match["line_numbers"])
+            aggregated_alerts[alert_key]["matched_lines"].extend(match["matched_lines"])
+            aggregated_alerts[alert_key]["aggregated"] = True
 
     return list(aggregated_alerts.values())
 
@@ -165,7 +170,7 @@ def write_json_output(alerts):
 
 def write_csv_output(alerts):
     with open("alerts.csv", "w", newline='') as csv_file:
-        fieldnames = ["title", "rule", "log_file", "line_numbers", "context"]
+        fieldnames = ["title", "rule", "log_file", "line_numbers", "matched_lines", "aggregated"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         for alert in alerts:
@@ -180,14 +185,15 @@ def write_plain_text_output(alerts):
             txt_file.write(f"Rule: {alert['rule']}\n")
             txt_file.write(f"Log File: {alert['log_file']}\n")
             txt_file.write(f"Line Numbers: {', '.join(map(str, alert['line_numbers']))}\n")
-            txt_file.write(f"Context:\n")
-            for line in alert['context']:
-                txt_file.write(f"  {line.strip()}\n")
+            if not alert["aggregated"]:
+                txt_file.write(f"Matched Lines:\n")
+                for line in alert['matched_lines']:
+                    txt_file.write(f"  {line.strip()}\n")
             txt_file.write("\n")
 
-# Main function definition and point of execution, with the output format arguments.
+# Main function definition and point of execution, with the output format arguments and the context option.
 
-def main(output_format):
+def main(output_format, context_line):
     # Read logs from the folder containing log files
     logs = read_logs_from_folder(log_folder_path)
 
@@ -214,9 +220,20 @@ def main(output_format):
         else:
             print("Invalid output format. Please choose 'json', 'csv' or 'plain'.")
 
+        # Context option to provide context for a specified alert
+        if context_line:
+            for alert in truncated_alerts:
+                if context_line in alert['line_numbers']:
+                    print(f"Context for line {context_line}:")
+                    context_start = max(alert['line_numbers'].index(context_line) - context_lines, 0)
+                    context_end = min(context_start + (context_lines * 2) + 1, len(alert['line_numbers']))
+                    for line_number, line in zip(alert['line_numbers'][context_start:context_end], alert['matched_lines'][context_start:context_end]):
+                        print(f"Line {line_number}: {line.strip()}")
+
  
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YARA rule-based log matching script")
     parser.add_argument("-o", "--output-format", choices=["json", "csv", "plain"], default="json", help="Output format (json, csv, plain)")
+    parser.add_argument("-c", "--context", type=int, help="Line number to show context for")
     args = parser.parse_args()
-    main(args.output_format)
+    main(args.output_format, args.context)
