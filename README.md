@@ -81,7 +81,7 @@ The script will apply a defined pool of YARA rules to a defined number of log fi
  
 ## Release Notes
 
-v.0.0.04	2024/02/05	First publication
-v.0.0.1		2024/02/07	Added csv output format
-v.0.0.11	2024/02/07	Added plain text format
-v.0.0.2		2024/02/09	Changed context into an option instead of a default output
+v.0.0.04	2024/02/05	First publication <br />
+v.0.0.1		2024/02/07	Added csv output format <br />
+v.0.0.11	2024/02/07	Added plain text format <br />
+v.0.0.2		2024/02/09	Changed context into an option instead of a default output <br />
