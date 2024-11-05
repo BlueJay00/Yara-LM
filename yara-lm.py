@@ -2,8 +2,8 @@
 
 __description__ = 'Matching YARA rules within log files'
 __author__ = 'BlueJay00'
-__version__ = '0.0.2'
-__date__ = '2023/02/09'
+__version__ = '0.0.3'
+__date__ = '2023/05/11'
 
 
 """
@@ -14,11 +14,12 @@ History:
   2024/02/05: first publication v0.0.04
   2024/02/06: added ReadMe and requirements.txt
   2024/02/07: csv output format added v.0.0.1
-  2024/02/07: plain text out format added v.0.0.11
+  2024/02/07: plain text output format added v.0.0.11
   2024/02/09: changed context into an option v.0.0.2
+  2024/11/05: html output format added v.0.0.3
   
 Todo:
-- Add more customizable Output Formats: Include other outputs (like xml, html) based on preference.
+- Add more customizable Output Formats: Include other outputs (like xml) based on preference.
 - Logging: Implement a logging mechanism to record script activities and errors, providing a log file for troubleshooting.
 - YARA Rule Versioning: Support different versions of YARA rules and allow to specify which version to use.
 - Parallel Processing: Enhance performance by implementing parallel processing, especially when dealing with a large number of logs or complex YARA rules.
@@ -31,7 +32,6 @@ Todo:
 - Alert Severity Levels: Assign severity levels to alerts based on the importance or potential impact of the detected alerts. Unsure yet!!!
 - Regular Expression Support: Extend the script to support regular expressions within YARA rules for more advanced pattern matching. Unsure yet!!!
 - Rule Whitelisting/Blacklisting: Allow to define rules or specific patterns to be whitelisted or blacklisted.
-
 """
 
 import os
@@ -191,6 +191,25 @@ def write_plain_text_output(alerts):
                     txt_file.write(f"  {line.strip()}\n")
             txt_file.write("\n")
 
+# Write output in HTML format
+
+def write_html_output(alerts):
+    with open("alerts.html", "w") as html_file:
+        html_file.write("<html><head><title>YARA Alert Report</title></head><body>")
+        html_file.write("<h1>YARA Alert Report</h1>")
+        for alert in alerts:
+            html_file.write(f"<h2>{alert['title']}</h2>")
+            html_file.write(f"<p><strong>Rule:</strong> {alert['rule']}</p>")
+            html_file.write(f"<p><strong>Log File:</strong> {alert['log_file']}</p>")
+            html_file.write(f"<p><strong>Line Numbers:</strong> {', '.join(map(str, alert['line_numbers']))}</p>")
+            if not alert["aggregated"]:
+                html_file.write("<p><strong>Matched Lines:</strong></p><ul>")
+                for line in alert['matched_lines']:
+                    html_file.write(f"<li>{line.strip()}</li>")
+                html_file.write("</ul>")
+            html_file.write("<hr>")
+        html_file.write("</body></html>")
+
 # Main function definition and point of execution, with the output format arguments and the context option.
 
 def main(output_format, context_line):
@@ -217,8 +236,10 @@ def main(output_format, context_line):
             write_csv_output(truncated_alerts)
         elif output_format == "plain":
             write_plain_text_output(truncated_alerts)
+        elif output_format == "html":
+            write_html_output(truncated_alerts)
         else:
-            print("Invalid output format. Please choose 'json', 'csv' or 'plain'.")
+            print("Invalid output format. Please choose 'json', 'csv', 'plain' or 'html'.")
 
         # Context option to provide context for a specified alert
         if context_line:
@@ -233,7 +254,7 @@ def main(output_format, context_line):
  
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YARA rule-based log matching script")
-    parser.add_argument("-o", "--output-format", choices=["json", "csv", "plain"], default="json", help="Output format (json, csv, plain)")
+    parser.add_argument("-o", "--output-format", choices=["json", "csv", "plain", "html"], default="json", help="Output format (json, csv, plain, html)")
     parser.add_argument("-c", "--context", type=int, help="Line number to show context for")
     args = parser.parse_args()
     main(args.output_format, args.context)
